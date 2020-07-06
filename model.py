@@ -41,6 +41,15 @@ class Sample:
 	def get(self, index: int) -> DataPoint:
 		return self.datapoints[index]
 
+	def get_values(self) -> List[float]:
+
+		values = list()
+
+		for datapoint in self.datapoints:
+			values.append(datapoint.value)
+
+		return values
+
 	def set(self, datapoint: DataPoint, index: int):
 		self.datapoints[index] = datapoint
 

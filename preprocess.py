@@ -1,5 +1,6 @@
 import csv
 import model
+import data
 import normalization as nz
 import mathematics as mt
 import util as u
@@ -8,7 +9,7 @@ import copy
 
 
 def filter_csv_by_sd(filename: str, attr_count: int, separator=',', rstrip=True) -> model.DataMatrix:
-	return filter_attributes_by_sd(csv.readcsv(filename, separator=separator, rstrip=rstrip), attr_count)
+	return filter_attributes_by_sd(data.build_model_from_csv(filename, separator=separator, rstrip=rstrip), attr_count)
 
 
 def normalize(datamatrix: model.DataMatrix, type='zscore', scaled_min=0, scaled_max=1) -> model.DataMatrix:
@@ -30,6 +31,10 @@ def zscore_normalize(datamatrix: model.DataMatrix, roundoff=True, decimal_place=
 		datamatrix.set_float_attribute_list(nz_attributes, i)
 
 	return datamatrix
+
+
+def zsn(datamatrix: model.DataMatrix, roundoff=True, decimal_place=4) -> model.DataMatrix:
+	return zscore_normalize(datamatrix, roundoff=roundoff, decimal_place=decimal_place)
 
 
 def minmax_normalize(datamatrix: model.DataMatrix, scaled_min=0, scaled_max=1, roundoff=True, decimal_place=4) -> model.DataMatrix:
@@ -94,3 +99,7 @@ def filter_attributes_by_sd(datamatrix: model.DataMatrix, attr_count: int) -> mo
 		unique_classlabels=copy.deepcopy(datamatrix.unique_classlabels),
 		dataset_name=datamatrix.dataset_name
 	)
+
+
+def fasd(datamatrix: model.DataMatrix, attr_count: int) -> model.DataMatrix:
+	return filter_attributes_by_sd(datamatrix, attr_count)
