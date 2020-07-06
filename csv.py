@@ -41,7 +41,7 @@ def writecsv_matrix(datamatrix: m.DataMatrix, filename=None):
 	if filename is None:
 		filename = datamatrix.dataset_name if datamatrix.dataset_name is not None else u.hash()
 
-	filename += '.csv'
+	filename = 'output-' + filename + '.csv'
 
 	writecsv(filename, list_of_list)
 
