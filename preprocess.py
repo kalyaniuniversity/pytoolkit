@@ -1,4 +1,4 @@
-import csv
+from typing import List, Tuple
 import model
 import data
 import normalization as nz
@@ -51,14 +51,24 @@ def minmax_normalize(datamatrix: model.DataMatrix, scaled_min=0, scaled_max=1, r
 	return datamatrix
 
 
-def sort_attributes_by_sd(datamatrix: model.DataMatrix) -> model.DataMatrix:
-	pass
+def sort_attributes_by_sd(datamatrix: model.DataMatrix, roundoff_decimal_place=4) -> model.DataMatrix:
+
+	sd_tuples = list()
+
+	for i in range(0, datamatrix.attribute_count()):
+		sd_tuples.append(
+			(i, mt.roundoff(
+				st.stdev(datamatrix.get_float_attribute_list(i)),
+				roundoff_decimal_place
+			))
+		)
+
+	return rearrange_sd_tuples(datamatrix, sd_tuples)
 
 
 def sort_classlabeled_attributes_by_sd(datamatrix: model.DataMatrix, roundoff_decimal_place=4) -> model.DataMatrix:
 
 	sd_tuples = list()
-	new_attributes = list()
 
 	for i in range(0, datamatrix.attribute_count()):
 		sd_tuples.append(
@@ -70,6 +80,13 @@ def sort_classlabeled_attributes_by_sd(datamatrix: model.DataMatrix, roundoff_de
 				)
 			]), roundoff_decimal_place))
 		)
+
+	return rearrange_sd_tuples(datamatrix, sd_tuples)
+
+
+def rearrange_sd_tuples(datamatrix: model.DataMatrix, sd_tuples: List[Tuple[int, float]]) -> model.DataMatrix:
+
+	new_attributes = list()
 
 	sd_tuples.sort(key=lambda value: value[1])
 

@@ -48,4 +48,3 @@ def writecsv_matrix(datamatrix: m.DataMatrix, filename=None):
 
 def wcsvm(datamatrix: m.DataMatrix, filename=None):
 	writecsv_matrix(datamatrix, filename=filename)
-
