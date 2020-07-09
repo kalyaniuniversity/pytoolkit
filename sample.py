@@ -30,6 +30,15 @@ class Sample:
 	def get(self, index: int) -> DataPoint:
 		return self.datapoints[index]
 
+	def get_datapoints(self, indices: List[int]) -> List[DataPoint]:
+
+		datapoints: List[DataPoint] = list()
+
+		for index in indices:
+			datapoints.append(copy.deepcopy(self.datapoints[index]))
+
+		return datapoints
+
 	def get_values(self) -> List[float]:
 
 		values: List[float] = list()
