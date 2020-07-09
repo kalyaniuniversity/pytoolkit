@@ -132,4 +132,5 @@ dmypy.json
 .idea
 pytoolkit.iml
 test.py
+output/
 

@@ -43,7 +43,13 @@ class DataMatrix:
 
 		for row in list_of_list:
 			label = row[-1]
-			samples.append(Sample.from_values(values=[float(i) for i in row[:-1]], associated_attributes=attributes, classlabel=label))
+			samples.append(
+				Sample.from_values(
+					values=[float(i) for i in (row[:-1] if has_classlabels else row)],
+					associated_attributes=attributes,
+					classlabel=(label if has_classlabels else None)
+				)
+			)
 			if has_classlabels:
 				classlabels.append(label)
 
@@ -53,6 +59,10 @@ class DataMatrix:
 					unique_classlabels.append(label)
 
 		return cls(samples, attributes=attributes, classlabels=classlabels, unique_classlabels=unique_classlabels)
+
+	@classmethod
+	def fll(cls, list_of_list: List[List[str]], has_attributes: bool = True, has_classlabels: bool = True) -> 'DataMatrix':
+		return cls.from_list_of_list(list_of_list, has_attributes=has_attributes, has_classlabels=has_classlabels)
 
 	def sample_count(self) -> int:
 		return len(self.samples)

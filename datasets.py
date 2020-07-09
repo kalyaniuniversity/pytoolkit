@@ -11,4 +11,4 @@ def leukemia() -> model.DataMatrix:
 
 
 def gse412() -> model.DataMatrix:
-	return data.build_model_from_csv('sample_datasets/child-all.csv')
+	return data.build_model_from_csv('sample_datasets/GSE412.csv')
