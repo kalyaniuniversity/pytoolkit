@@ -1,6 +1,9 @@
-def readfile(filename, rstrip=False):
+from typing import List
 
-	lines = list()
+
+def readfile(filename: str, rstrip: bool = False) -> List[str]:
+
+	lines: List[str] = list()
 
 	with open(filename, 'r') as datafile:
 		for line in datafile:
@@ -11,7 +14,7 @@ def readfile(filename, rstrip=False):
 	return lines
 
 
-def writefile(filename, content):
+def writefile(filename: str, content: str):
 	writer = open(filename, 'w+')
 	writer.write(content)
 	writer.close()
