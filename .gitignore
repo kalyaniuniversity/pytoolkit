@@ -133,4 +133,5 @@ dmypy.json
 pytoolkit.iml
 test.py
 output/
-
+__temp__/
+_temp_/

@@ -4,6 +4,7 @@ import model as m
 import string
 import random
 import os
+import math
 
 
 def hash(length=10) -> str:
@@ -19,13 +20,18 @@ def create_path_if_not_exists(path: str):
 		os.mkdir(path)
 
 
+def roundoff(value: float, decimal_place: int) -> float:
+	decimal_place: float = pow(10, decimal_place)
+	return math.ceil(value * decimal_place) / decimal_place
+
+
 def equal_lists(list1: List[float], list2: List[float]) -> bool:
 
 	if len(list1) != len(list2):
 		return False
 
 	for i in range(len(list1)):
-		if str(list1[i]) != str(list2[i]):
+		if not math.isclose(list1[i], list2[i], rel_tol=0.00001) and not math.isclose(list1[i], list2[i], abs_tol=0.00001):
 			return False
 
 	return True

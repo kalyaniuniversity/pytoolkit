@@ -2,7 +2,6 @@ from typing import List, Tuple, Union
 import model
 import data
 import normalization as nz
-import mathematics as mt
 import util as u
 import statistics as st
 import copy
@@ -13,6 +12,7 @@ import numpy as np
 from scipy import sparse
 import csv_handler as csv
 import os
+import math
 
 
 def filter_csv_by_sd(filename: str, attr_count: int, separator: str = ',', rstrip: bool = True) -> model.DataMatrix:
@@ -31,7 +31,7 @@ def zscore_normalize(datamatrix: model.DataMatrix, roundoff: bool = True, decima
 	for i in range(0, datamatrix.attribute_count()):
 		attributes: List[float] = datamatrix.get_float_attribute_list(i)
 		nz_attributes: List[float] = [
-			mt.roundoff(nz.zscore(attr, attributes), decimal_place) for attr in attributes
+			u.roundoff(nz.zscore(attr, attributes), decimal_place) for attr in attributes
 		] if roundoff else [
 			nz.zscore(attr, attributes) for attr in attributes
 		]
@@ -55,7 +55,7 @@ def minmax_normalize(
 	for i in range(0, datamatrix.attribute_count()):
 		attributes: List[float] = datamatrix.get_float_attribute_list(i)
 		nz_attributes: List[float] = [
-			mt.roundoff(nz.minmax(attr, min(attributes), max(attributes), scaled_min, scaled_max), decimal_place) for attr in attributes
+			u.roundoff(nz.minmax(attr, min(attributes), max(attributes), scaled_min, scaled_max), decimal_place) for attr in attributes
 		] if roundoff else [
 			nz.minmax(attr, min(attributes), max(attributes), scaled_min, scaled_max) for attr in attributes
 		]
@@ -130,7 +130,7 @@ def fasd(datamatrix: model.DataMatrix, attr_count: int) -> model.DataMatrix:
 	return filter_attributes_by_sd(datamatrix, attr_count)
 
 
-def filter_cells(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMatrix:
+def filter_cells(datamatrix: model.DataMatrix, min_counts: int, roundoff_decimal: int = 5) -> model.DataMatrix:
 
 	list_of_list: List[List[float]] = datamatrix.get_list_of_list(append_attribute_labels=False, append_classlabels=False)
 	cell_filtered_lol: List[Union[List[str], List[Union[float, str]]]] = list()
@@ -141,6 +141,8 @@ def filter_cells(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMat
 	cf_filename: str = filehash + '-cell_filtered.csv'
 	complete_file_path: str = os.path.join(temp_folder, filename)
 
+	list_of_list = [[u.roundoff(value, roundoff_decimal) for value in row] for row in list_of_list]
+
 	u.create_path_if_not_exists(temp_folder)
 	pd.DataFrame(list_of_list).to_csv(complete_file_path, index=False, index_label=False, header=False)
 
@@ -150,7 +152,7 @@ def filter_cells(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMat
 	sc.pp.filter_cells(sc_object, min_counts=min_counts)
 
 	for row in sc_object.X:
-		cell_filtered_lol.append(row.tolist())
+		cell_filtered_lol.append([u.roundoff(value, roundoff_decimal) for value in row.tolist()])
 
 	# delete
 	count: int = 0
@@ -187,5 +189,5 @@ def filter_cells(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMat
 
 
 
-def fc(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMatrix:
-	return filter_cells(datamatrix, min_counts)
+def fc(datamatrix: model.DataMatrix, min_counts: int, rd: int = 5) -> model.DataMatrix:
+	return filter_cells(datamatrix, min_counts, roundoff_decimal=rd)
