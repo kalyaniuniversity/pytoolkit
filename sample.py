@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from datapoint import DataPoint
 import copy
 
@@ -39,12 +39,15 @@ class Sample:
 
 		return datapoints
 
-	def get_values(self) -> List[float]:
+	def get_values(self, append_classlabel: bool = False) -> List[float] or List[Union[float, str]]:
 
-		values: List[float] = list()
+		values: List[float] or List[Union[float, str]] = list()
 
 		for datapoint in self.datapoints:
 			values.append(datapoint.value)
+
+		if append_classlabel:
+			values.append(self.classlabel)
 
 		return values
 

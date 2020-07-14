@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from sample import Sample
 import copy
 
@@ -70,8 +70,22 @@ class DataMatrix:
 	def attribute_count(self) -> int:
 		return len(self.attributes)
 
+	def get_attribute(self, index: int) -> List[Union[str, float]]:
+
+		attribute_column: List[Union[str, float]] = list()
+
+		attribute_column.append(self.get_attribute_label(index))
+
+		for value in self.get_float_attribute_list(index):
+			attribute_column.append(value)
+
+		return attribute_column
+
 	def get_attribute_label(self, index: int) -> str:
 		return self.attributes[index]
+
+	def get_classlabel(self, index: int) -> str:
+		return self.classlabels[index]
 
 	def get_float_attribute_list(self, attr_index: int) -> List[float]:
 
@@ -81,6 +95,24 @@ class DataMatrix:
 			values.append(sample.get(attr_index).value)
 
 		return values
+
+	def get_list_of_list(self, append_attribute_labels: bool = True, append_classlabels: bool = True) -> List[Union[List[str], List[float]]]:
+
+		list_of_list: List[Union[List[str], List[float]]] = list()
+
+		if append_attribute_labels:
+			attributes_row: List[str] = copy.deepcopy(self.attributes)
+			if append_classlabels:
+				attributes_row.append('class')
+			list_of_list.append(attributes_row)
+
+		for sample in self.samples:
+			list_of_list.append(sample.get_values(append_classlabel=append_classlabels))
+
+		return list_of_list
+
+	def glol(self, aal: bool = True, acl: bool = True) -> List[Union[List[str], List[float]]]:
+		return self.get_list_of_list(append_attribute_labels=aal, append_classlabels=acl)
 
 	def set_float_attribute_list(self, values: List[float], attr_index: int):
 		for i in range(0, self.sample_count()):

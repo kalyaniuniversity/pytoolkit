@@ -1,4 +1,4 @@
-import csv
+import csv_handler as csv
 import model as m
 from typing import List
 import copy
@@ -31,3 +31,5 @@ def build_model_from_selected_attributes(filename: str, attributes: List[str], s
 	)
 
 
+def bmsa(filename: str, attributes: List[str], separator: str = ',', rstrip: bool = True) -> m.DataMatrix:
+	return build_model_from_selected_attributes(filename, attributes, separator=separator, rstrip=rstrip)

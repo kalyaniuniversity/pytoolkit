@@ -12,3 +12,11 @@ def leukemia() -> model.DataMatrix:
 
 def gse412() -> model.DataMatrix:
 	return data.build_model_from_csv('sample_datasets/GSE412.csv')
+
+
+def bmmcaml() -> model.DataMatrix:
+	return data.build_model_from_csv('sample_datasets/bmmc-aml.csv')
+
+
+def gse75140binary() -> model.DataMatrix:
+	return data.build_model_from_csv('sample_datasets/GSE75140-binary.csv')

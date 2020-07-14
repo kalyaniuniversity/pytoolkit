@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Union
 import model
 import data
 import normalization as nz
@@ -6,6 +6,13 @@ import mathematics as mt
 import util as u
 import statistics as st
 import copy
+import pandas as pd
+import scanpy as sc
+import anndata as ad
+import numpy as np
+from scipy import sparse
+import csv_handler as csv
+import os
 
 
 def filter_csv_by_sd(filename: str, attr_count: int, separator: str = ',', rstrip: bool = True) -> model.DataMatrix:
@@ -121,3 +128,64 @@ def filter_attributes_by_sd(datamatrix: model.DataMatrix, attr_count: int) -> mo
 
 def fasd(datamatrix: model.DataMatrix, attr_count: int) -> model.DataMatrix:
 	return filter_attributes_by_sd(datamatrix, attr_count)
+
+
+def filter_cells(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMatrix:
+
+	list_of_list: List[List[float]] = datamatrix.get_list_of_list(append_attribute_labels=False, append_classlabels=False)
+	cell_filtered_lol: List[Union[List[str], List[Union[float, str]]]] = list()
+	unfiltered_attributes_list: List[str] = copy.deepcopy(datamatrix.attributes)
+	temp_folder: str = '__temp__'
+	filehash: str = u.hash()
+	filename: str = filehash + '.csv'
+	cf_filename: str = filehash + '-cell_filtered.csv'
+	complete_file_path: str = os.path.join(temp_folder, filename)
+
+	u.create_path_if_not_exists(temp_folder)
+	pd.DataFrame(list_of_list).to_csv(complete_file_path, index=False, index_label=False, header=False)
+
+	sc_object: ad.AnnData = sc.read_csv(complete_file_path)
+	stale_X: Union[np.ndarray, sparse.spmatrix, None] = copy.deepcopy(sc_object.X)
+
+	sc.pp.filter_cells(sc_object, min_counts=min_counts)
+
+	for row in sc_object.X:
+		cell_filtered_lol.append(row.tolist())
+
+	# delete
+	count: int = 0
+
+	for filtered_row in cell_filtered_lol:
+		for row_index in range(datamatrix.sample_count()):
+			if u.equal_lists(filtered_row, list_of_list[row_index]):
+				filtered_row.append(datamatrix.get_classlabel(row_index))
+				count += 1
+				break
+
+	print("count: ", count)
+
+	cell_filtered_lol.insert(0, unfiltered_attributes_list)
+	cell_filtered_lol[0].append('class')
+	csv.writecsv(cf_filename, cell_filtered_lol, directory=temp_folder)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def fc(datamatrix: model.DataMatrix, min_counts: int) -> model.DataMatrix:
+	return filter_cells(datamatrix, min_counts)

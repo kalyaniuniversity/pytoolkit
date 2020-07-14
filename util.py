@@ -14,6 +14,23 @@ def is_valid_path(path: str) -> bool:
 	return os.path.exists(path)
 
 
+def create_path_if_not_exists(path: str):
+	if not is_valid_path(path):
+		os.mkdir(path)
+
+
+def equal_lists(list1: List[float], list2: List[float]) -> bool:
+
+	if len(list1) != len(list2):
+		return False
+
+	for i in range(len(list1)):
+		if str(list1[i]) != str(list2[i]):
+			return False
+
+	return True
+
+
 def get_label_separated_attributes(attribute_list: List[float], classlabels: List[str], unique_classlabels: List[str]) -> List[List[float]]:
 
 	label_separated_attributes: List[List[float]] = list()
