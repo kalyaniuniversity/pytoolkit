@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 from sample import Sample
 import copy
 
@@ -69,6 +69,9 @@ class DataMatrix:
 
 	def attribute_count(self) -> int:
 		return len(self.attributes)
+
+	def shape(self) -> Tuple[int, int]:
+		return self.sample_count(), self.attribute_count()
 
 	def get_attribute(self, index: int) -> List[Union[str, float]]:
 

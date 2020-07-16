@@ -17,6 +17,18 @@ def readcsv(filename: str, separator: str = ',', rstrip: bool = True) -> List[Li
 	return list_of_list
 
 
+def readcsv_float_values(filename: str, separator: str = ',', rstrip: bool = True) -> List[List[float]]:
+
+	list_of_list: List[List[str] or List[float]] = readcsv(filename, separator=separator, rstrip=rstrip)
+
+	list_of_list.pop(0)
+
+	list_of_list = [row[:-1] for row in list_of_list]
+	list_of_list = [[float(value) for value in row] for row in list_of_list]
+
+	return list_of_list
+
+
 def writecsv(
 		filename: str,
 		list_of_list: List[List[float]] or List[List[str]],

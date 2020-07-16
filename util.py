@@ -20,21 +20,46 @@ def create_path_if_not_exists(path: str):
 		os.mkdir(path)
 
 
-def roundoff(value: float, decimal_place: int) -> float:
+def roundoff(value: float, decimal_place: int, force_completion: bool = False) -> float:
 	decimal_place: float = pow(10, decimal_place)
-	return math.ceil(value * decimal_place) / decimal_place
+	rounded_value: float = math.ceil(value * decimal_place) / decimal_place
+
+	if force_completion:
+		while decimal_points(rounded_value) != decimal_place:
+			rounded_value = float(str(rounded_value) + '0')
+
+	return rounded_value
 
 
-def equal_lists(list1: List[float], list2: List[float]) -> bool:
+def decimal_points(value: float) -> int:
+
+	value = str(value)
+
+	if '.' not in value:
+		return 0
+	return len(value.split('.')[1])
+
+
+def equal_lists(list1: List[float], list2: List[float], tolerance: float = 0.0) -> bool:
 
 	if len(list1) != len(list2):
 		return False
 
 	for i in range(len(list1)):
-		if not math.isclose(list1[i], list2[i], rel_tol=0.00001) and not math.isclose(list1[i], list2[i], abs_tol=0.00001):
+		if not math.isclose(list1[i], list2[i], rel_tol=tolerance) and not math.isclose(list1[i], list2[i], abs_tol=tolerance):
 			return False
 
 	return True
+
+
+def get_column(list_of_list: List[List], index: int) -> List:
+
+	column: List = list()
+
+	for row in list_of_list:
+		column.append(row[index])
+
+	return column
 
 
 def get_label_separated_attributes(attribute_list: List[float], classlabels: List[str], unique_classlabels: List[str]) -> List[List[float]]:

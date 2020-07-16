@@ -8,11 +8,8 @@ import copy
 import pandas as pd
 import scanpy as sc
 import anndata as ad
-import numpy as np
-from scipy import sparse
 import csv_handler as csv
 import os
-import math
 
 
 def filter_csv_by_sd(filename: str, attr_count: int, separator: str = ',', rstrip: bool = True) -> model.DataMatrix:
@@ -130,64 +127,86 @@ def fasd(datamatrix: model.DataMatrix, attr_count: int) -> model.DataMatrix:
 	return filter_attributes_by_sd(datamatrix, attr_count)
 
 
-def filter_cells(datamatrix: model.DataMatrix, min_counts: int, roundoff_decimal: int = 5) -> model.DataMatrix:
+def filter_cells(datamatrix: model.DataMatrix, min_cells: int, roundoff_decimal: int = 5, filehash: str = u.hash()) -> model.DataMatrix:
 
 	list_of_list: List[List[float]] = datamatrix.get_list_of_list(append_attribute_labels=False, append_classlabels=False)
 	cell_filtered_lol: List[Union[List[str], List[Union[float, str]]]] = list()
 	unfiltered_attributes_list: List[str] = copy.deepcopy(datamatrix.attributes)
-	temp_folder: str = '__temp__'
-	filehash: str = u.hash()
 	filename: str = filehash + '.csv'
-	cf_filename: str = filehash + '-cell_filtered.csv'
-	complete_file_path: str = os.path.join(temp_folder, filename)
+	sc_object = data.read_as_anndata(list_of_list, roundoff_decimal=roundoff_decimal, filename=filename)
 
-	list_of_list = [[u.roundoff(value, roundoff_decimal) for value in row] for row in list_of_list]
-
-	u.create_path_if_not_exists(temp_folder)
-	pd.DataFrame(list_of_list).to_csv(complete_file_path, index=False, index_label=False, header=False)
-
-	sc_object: ad.AnnData = sc.read_csv(complete_file_path)
-	stale_X: Union[np.ndarray, sparse.spmatrix, None] = copy.deepcopy(sc_object.X)
-
-	sc.pp.filter_cells(sc_object, min_counts=min_counts)
+	sc.pp.filter_cells(sc_object, min_counts=min_cells)
 
 	for row in sc_object.X:
 		cell_filtered_lol.append([u.roundoff(value, roundoff_decimal) for value in row.tolist()])
 
-	# delete
-	count: int = 0
-
 	for filtered_row in cell_filtered_lol:
 		for row_index in range(datamatrix.sample_count()):
-			if u.equal_lists(filtered_row, list_of_list[row_index]):
+			if u.equal_lists(filtered_row, list_of_list[row_index], tolerance=0.00002):
 				filtered_row.append(datamatrix.get_classlabel(row_index))
-				count += 1
 				break
-
-	print("count: ", count)
 
 	cell_filtered_lol.insert(0, unfiltered_attributes_list)
 	cell_filtered_lol[0].append('class')
-	csv.writecsv(cf_filename, cell_filtered_lol, directory=temp_folder)
+
+	return model.DataMatrix.from_list_of_list(cell_filtered_lol)
 
 
+def fc(datamatrix: model.DataMatrix, mc: int, rd: int = 5, fh: str = u.hash()) -> model.DataMatrix:
+	return filter_cells(datamatrix, min_cells=mc, roundoff_decimal=rd, filehash=fh)
 
 
+def filter_genes(datamatrix: model.DataMatrix, min_genes: int, roundoff_decimal: int = 5, filehash: str = u.hash()) -> model.DataMatrix:
+
+	list_of_list: List[List[float]] = datamatrix.get_list_of_list(append_attribute_labels=False, append_classlabels=False)
+	gene_filtered_lol: List[Union[List[str], List[Union[float, str]]]] = list()
+	filtered_attributes_list: List[str] = list()
+	filename: str = filehash + '-cell_filtered.csv'
+	sc_object = data.read_as_anndata(list_of_list, roundoff_decimal=roundoff_decimal, filename=filename)
+
+	sc.pp.filter_genes(sc_object, min_counts=min_genes)
+
+	for row in sc_object.X:
+		gene_filtered_lol.append([u.roundoff(value, roundoff_decimal) for value in row.tolist()])
+
+	for filtered_attr_index in range(len(gene_filtered_lol[0])):
+
+		f_column: List[float] = u.get_column(gene_filtered_lol, filtered_attr_index)
+
+		for i in range(datamatrix.attribute_count()):
+			if u.equal_lists(
+				u.get_column(list_of_list, i),
+				f_column,
+				tolerance=0.00002
+			):
+				filtered_attributes_list.append(datamatrix.get_attribute_label(i))
+
+	for i in range(datamatrix.sample_count()):
+		gene_filtered_lol[i].append(datamatrix.get_classlabel(i))
+
+	gene_filtered_lol.insert(0, filtered_attributes_list)
+	gene_filtered_lol[0].append('class')
+
+	return model.DataMatrix.from_list_of_list(gene_filtered_lol)
 
 
+def fg(datamatrix: model.DataMatrix, mg: int, rd: int = 5, fh: str = u.hash()) -> model.DataMatrix:
+	return filter_genes(datamatrix, min_genes=mg, roundoff_decimal=rd, filehash=fh)
 
 
+def filter_singlecells(datamatrix: model.DataMatrix, min_cells: int, min_genes: int, roundoff_decimal: int = 5) -> model.DataMatrix:
+
+	filehash: str = u.hash()
+	temp_folder: str = '__temp__'
+	cf_filename: str = filehash + '-cell_filtered.csv'
+	datamatrix = filter_cells(datamatrix, min_cells=min_cells, roundoff_decimal=roundoff_decimal, filehash=filehash)
+
+	csv.writecsv(cf_filename, datamatrix.glol(), directory=temp_folder)
+
+	datamatrix = filter_genes(datamatrix, min_genes=min_genes, roundoff_decimal=roundoff_decimal, filehash=filehash)
+
+	return datamatrix
 
 
-
-
-
-
-
-
-
-
-
-
-def fc(datamatrix: model.DataMatrix, min_counts: int, rd: int = 5) -> model.DataMatrix:
-	return filter_cells(datamatrix, min_counts, roundoff_decimal=rd)
+def fsc(datamatrix: model.DataMatrix, min_cells: int, min_genes: int, rd: int = 5) -> model.DataMatrix:
+	return filter_singlecells(datamatrix, min_cells, min_genes=min_genes, roundoff_decimal=rd)
