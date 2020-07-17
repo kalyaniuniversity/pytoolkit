@@ -1,15 +1,12 @@
+import copy
+import statistics as st
 from typing import List, Tuple, Union
-import model
+import scanpy as sc
+import csv_handler as csv
 import data
+import model
 import normalization as nz
 import util as u
-import statistics as st
-import copy
-import pandas as pd
-import scanpy as sc
-import anndata as ad
-import csv_handler as csv
-import os
 
 
 def filter_csv_by_sd(filename: str, attr_count: int, separator: str = ',', rstrip: bool = True) -> model.DataMatrix:
@@ -205,8 +202,10 @@ def filter_singlecells(datamatrix: model.DataMatrix, min_cells: int, min_genes: 
 
 	datamatrix = filter_genes(datamatrix, min_genes=min_genes, roundoff_decimal=roundoff_decimal, filehash=filehash)
 
+	u.clear_temp()
+
 	return datamatrix
 
 
-def fsc(datamatrix: model.DataMatrix, min_cells: int, min_genes: int, rd: int = 5) -> model.DataMatrix:
-	return filter_singlecells(datamatrix, min_cells, min_genes=min_genes, roundoff_decimal=rd)
+def fsc(datamatrix: model.DataMatrix, mc: int, mg: int, rd: int = 5) -> model.DataMatrix:
+	return filter_singlecells(datamatrix, mc, mg, roundoff_decimal=rd)

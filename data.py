@@ -1,12 +1,11 @@
-import csv_handler as csv
-import model as m
-from typing import List, Union, Tuple
 import copy
+import os
+from typing import List
 import anndata as ad
 import scanpy as sc
-import pandas as pd
+import csv_handler as csv
+import model as m
 import util as u
-import os
 
 
 def build_model_from_csv(filename: str, separator: str = ',', rstrip: bool = True) -> m.DataMatrix:
@@ -48,7 +47,7 @@ def read_as_anndata(list_of_list: List[List[float]], roundoff_decimal: int = 5, 
 	list_of_list = [[u.roundoff(value, roundoff_decimal) for value in row] for row in list_of_list]
 
 	u.create_path_if_not_exists(temp_folder)
-	pd.DataFrame(list_of_list).to_csv(complete_file_path, index=False, index_label=False, header=False)
+	csv.writecsv(filename, list_of_list, directory=temp_folder)
 
 	return sc.read_csv(complete_file_path)
 

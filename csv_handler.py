@@ -1,9 +1,10 @@
+import copy
+import os
+from typing import List, Union
+
 import file
 import model as m
 import util as u
-from typing import List, Union
-import copy
-import os
 
 
 def readcsv(filename: str, separator: str = ',', rstrip: bool = True) -> List[List[str]]:

@@ -1,6 +1,7 @@
-from typing import List, Union, Tuple
-from sample import Sample
 import copy
+from typing import List, Union, Tuple
+
+from sample import Sample
 
 
 class DataMatrix:

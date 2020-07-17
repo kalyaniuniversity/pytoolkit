@@ -1,6 +1,7 @@
-from typing import List, Union
-from datapoint import DataPoint
 import copy
+from typing import List, Union
+
+from datapoint import DataPoint
 
 
 class Sample:

@@ -1,10 +1,12 @@
-from typing import List, Union
 import copy
-import model as m
-import string
-import random
-import os
 import math
+import os
+import random
+import string
+import glob
+from typing import List, Union
+
+import model as m
 
 
 def hash(length=10) -> str:
@@ -103,3 +105,17 @@ def get_classlabeled_list_of_list_from_datamatrix(datamatrix: m.DataMatrix) -> L
 
 def gclld(datamatrix: m.DataMatrix) -> List[List[Union[float, str]]]:
 	return get_classlabeled_list_of_list_from_datamatrix(datamatrix)
+
+
+def clear_temp():
+
+	temp_folder: str = '__temp__'
+
+	if not is_valid_path(temp_folder):
+		return
+
+	filelist = glob.glob(os.path.join(temp_folder, '*'))
+
+	for f in filelist:
+		if is_valid_path(os.path.join(f)):
+			os.remove(f)
