@@ -20,3 +20,7 @@ def bmmcaml() -> model.DataMatrix:
 
 def gse75140binary() -> model.DataMatrix:
 	return data.build_model_from_csv('sample_datasets/GSE75140-binary.csv')
+
+
+def pbmc3kprocessed() -> model.DataMatrix:
+	return data.build_model_from_csv('sample_datasets/pbmc3k-processed.csv')

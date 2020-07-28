@@ -135,3 +135,5 @@ test.py
 output/
 __temp__/
 _temp_/
+cvt.txt
+input/

@@ -124,7 +124,12 @@ def fasd(datamatrix: model.DataMatrix, attr_count: int) -> model.DataMatrix:
 	return filter_attributes_by_sd(datamatrix, attr_count)
 
 
-def filter_cells(datamatrix: model.DataMatrix, min_cells: int, roundoff_decimal: int = 5, filehash: str = u.hash()) -> model.DataMatrix:
+def filter_cells(
+		datamatrix: model.DataMatrix,
+		min_cells: int,
+		roundoff_decimal: int = 5,
+		filehash: str = u.hash(),
+		writefile: bool = True) -> model.DataMatrix:
 
 	list_of_list: List[List[float]] = datamatrix.get_list_of_list(append_attribute_labels=False, append_classlabels=False)
 	cell_filtered_lol: List[Union[List[str], List[Union[float, str]]]] = list()
@@ -146,14 +151,23 @@ def filter_cells(datamatrix: model.DataMatrix, min_cells: int, roundoff_decimal:
 	cell_filtered_lol.insert(0, unfiltered_attributes_list)
 	cell_filtered_lol[0].append('class')
 
+	if writefile:
+		csv.writecsv(filehash + '-cell_filtered.csv', cell_filtered_lol, directory='__temp__')
+
 	return model.DataMatrix.from_list_of_list(cell_filtered_lol)
 
 
-def fc(datamatrix: model.DataMatrix, mc: int, rd: int = 5, fh: str = u.hash()) -> model.DataMatrix:
-	return filter_cells(datamatrix, min_cells=mc, roundoff_decimal=rd, filehash=fh)
+def fc(datamatrix: model.DataMatrix, mc: int, rd: int = 5, fh: str = u.hash(), wf: bool = True) -> model.DataMatrix:
+	return filter_cells(datamatrix, min_cells=mc, roundoff_decimal=rd, filehash=fh, writefile=wf)
 
 
-def filter_genes(datamatrix: model.DataMatrix, min_genes: int, roundoff_decimal: int = 5, filehash: str = u.hash()) -> model.DataMatrix:
+def filter_genes(
+		datamatrix: model.DataMatrix,
+		min_genes: int,
+		roundoff_decimal: int = 5,
+		filehash: str = u.hash(),
+		writefile: bool = True
+) -> model.DataMatrix:
 
 	list_of_list: List[List[float]] = datamatrix.get_list_of_list(append_attribute_labels=False, append_classlabels=False)
 	gene_filtered_lol: List[Union[List[str], List[Union[float, str]]]] = list()
@@ -177,6 +191,7 @@ def filter_genes(datamatrix: model.DataMatrix, min_genes: int, roundoff_decimal:
 				tolerance=0.00002
 			):
 				filtered_attributes_list.append(datamatrix.get_attribute_label(i))
+				break
 
 	for i in range(datamatrix.sample_count()):
 		gene_filtered_lol[i].append(datamatrix.get_classlabel(i))
@@ -184,28 +199,32 @@ def filter_genes(datamatrix: model.DataMatrix, min_genes: int, roundoff_decimal:
 	gene_filtered_lol.insert(0, filtered_attributes_list)
 	gene_filtered_lol[0].append('class')
 
+	if writefile:
+		csv.writecsv(filehash + '-gene_filtered.csv', gene_filtered_lol, directory='__temp__')
+
 	return model.DataMatrix.from_list_of_list(gene_filtered_lol)
 
 
-def fg(datamatrix: model.DataMatrix, mg: int, rd: int = 5, fh: str = u.hash()) -> model.DataMatrix:
-	return filter_genes(datamatrix, min_genes=mg, roundoff_decimal=rd, filehash=fh)
+def fg(datamatrix: model.DataMatrix, mg: int, rd: int = 5, fh: str = u.hash(), wf: bool = True) -> model.DataMatrix:
+	return filter_genes(datamatrix, min_genes=mg, roundoff_decimal=rd, filehash=fh, writefile=wf)
 
 
-def filter_singlecells(datamatrix: model.DataMatrix, min_cells: int, min_genes: int, roundoff_decimal: int = 5) -> model.DataMatrix:
+def filter_singlecells(
+		datamatrix: model.DataMatrix,
+		min_cells: int,
+		min_genes: int,
+		roundoff_decimal: int = 5,
+		clear_temp: bool = False) -> model.DataMatrix:
 
 	filehash: str = u.hash()
-	temp_folder: str = '__temp__'
-	cf_filename: str = filehash + '-cell_filtered.csv'
 	datamatrix = filter_cells(datamatrix, min_cells=min_cells, roundoff_decimal=roundoff_decimal, filehash=filehash)
-
-	csv.writecsv(cf_filename, datamatrix.glol(), directory=temp_folder)
-
 	datamatrix = filter_genes(datamatrix, min_genes=min_genes, roundoff_decimal=roundoff_decimal, filehash=filehash)
 
-	u.clear_temp()
+	if clear_temp:
+		u.clear_temp()
 
 	return datamatrix
 
 
-def fsc(datamatrix: model.DataMatrix, mc: int, mg: int, rd: int = 5) -> model.DataMatrix:
-	return filter_singlecells(datamatrix, mc, mg, roundoff_decimal=rd)
+def fsc(datamatrix: model.DataMatrix, mc: int, mg: int, rd: int = 5, ct: bool = False) -> model.DataMatrix:
+	return filter_singlecells(datamatrix, mc, mg, roundoff_decimal=rd, clear_temp=ct)

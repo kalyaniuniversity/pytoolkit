@@ -13,9 +13,19 @@ def build_model_from_csv(filename: str, separator: str = ',', rstrip: bool = Tru
 
 
 def build_model_from_selected_attributes(filename: str, attributes: List[str], separator: str = ',', rstrip: bool = True) -> m.DataMatrix:
+	return build_subset_from_selected_attributes(
+		build_model_from_csv(filename, separator=separator, rstrip=rstrip),
+		attributes
+	)
+
+
+def bmfsa(f: str, a: List[str], s: str = ',', rs: bool = True) -> m.DataMatrix:
+	return build_model_from_selected_attributes(f, a, separator=s, rstrip=rs)
+
+
+def build_subset_from_selected_attributes(datamatrix: m.DataMatrix, attributes: List[str]) -> m.DataMatrix:
 
 	new_samples: List[m.Sample] = list()
-	datamatrix: m.DataMatrix = build_model_from_csv(filename, separator=separator, rstrip=rstrip)
 
 	for sample in datamatrix.samples:
 		new_samples.append(m.Sample(
@@ -33,6 +43,10 @@ def build_model_from_selected_attributes(filename: str, attributes: List[str], s
 		unique_classlabels=copy.deepcopy(datamatrix.unique_classlabels),
 		dataset_name=datamatrix.dataset_name
 	)
+
+
+def bfsfa(d: m.DataMatrix, a: List[str]) -> m.DataMatrix:
+	return build_subset_from_selected_attributes(d, a)
 
 
 def bmsa(filename: str, attributes: List[str], separator: str = ',', rstrip: bool = True) -> m.DataMatrix:
